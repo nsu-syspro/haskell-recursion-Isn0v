@@ -1,5 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use map" #-}
+
 -- The above pragma enables all warnings
 -- (except for unused imports from Task1)
 
@@ -7,12 +10,12 @@ module Task2 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, tail, init, last, show, read)
 
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (reverse, map, sum)
+import Task1 (allButLast, doubleEveryOther, lastDigit, map, reverse, sum, toDigits)
+import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read, reverse, show, sum, tail)
 
 -----------------------------------
 --
@@ -25,7 +28,7 @@ import Task1 (reverse, map, sum)
 -- 1
 
 luhnModN :: Int -> (a -> Int) -> [a] -> Int
-luhnModN = error "TODO: define luhnModN"
+luhnModN n f x = (n - sum (normallize (doubleEveryOther (map f x)) n)) `mod` n
 
 -----------------------------------
 --
@@ -37,7 +40,7 @@ luhnModN = error "TODO: define luhnModN"
 -- 1
 
 luhnDec :: [Int] -> Int
-luhnDec = error "TODO: define luhnDec"
+luhnDec = luhnModN 10 id
 
 -----------------------------------
 --
@@ -49,7 +52,7 @@ luhnDec = error "TODO: define luhnDec"
 -- 15
 
 luhnHex :: [Char] -> Int
-luhnHex = error "TODO: define luhnHex"
+luhnHex = luhnModN 16 digitToInt
 
 -----------------------------------
 --
@@ -65,7 +68,14 @@ luhnHex = error "TODO: define luhnHex"
 -- [10,11,12,13,14,15]
 
 digitToInt :: Char -> Int
-digitToInt = error "TODO: define digitToInt"
+digitToInt c
+  | fromEnum c >= fromEnum '0' && fromEnum c <= fromEnum '9' =
+      fromEnum c - fromEnum '0'
+  | fromEnum c >= fromEnum 'A' && fromEnum c <= fromEnum 'F' =
+      fromEnum c - fromEnum 'A' + 10
+  | fromEnum c >= fromEnum 'a' && fromEnum c <= fromEnum 'f' =
+      fromEnum c - fromEnum 'a' + 10
+  | otherwise = error "Invalid digit"
 
 -----------------------------------
 --
@@ -82,7 +92,7 @@ digitToInt = error "TODO: define digitToInt"
 -- False
 
 validateDec :: Integer -> Bool
-validateDec = error "TODO: define validateDec"
+validateDec x = luhnDec (allButLast (toDigits x)) == lastDigit (toDigits x)
 
 -----------------------------------
 --
@@ -99,4 +109,8 @@ validateDec = error "TODO: define validateDec"
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex = error "TODO: define validateHex"
+validateHex x = luhnHex (allButLast x) == digitToInt (lastDigit x)
+
+normallize :: [Int] -> Int -> [Int]
+normallize x n = map (\y -> if y >= n then y - n + 1 else y) x
+
