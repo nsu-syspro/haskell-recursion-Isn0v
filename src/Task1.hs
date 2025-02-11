@@ -27,7 +27,7 @@ import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read
 -- False
 
 validate :: Integer -> Bool
-validate x = luhn (allButLast (toDigits x)) == lastDigit (toDigits x)
+validate x = luhn (init (toDigits x)) == last (toDigits x)
 
 -----------------------------------
 --
@@ -41,15 +41,15 @@ validate x = luhn (allButLast (toDigits x)) == lastDigit (toDigits x)
 luhn :: [Int] -> Int
 luhn x = (10 - (sum (map normalize (doubleEveryOther x)) `mod` 10)) `mod` 10
 
-allButLast :: [a] -> [a]
-allButLast [] = []
-allButLast [_] = []
-allButLast (x : xs) = x : allButLast xs
+init :: [a] -> [a]
+init [] = []
+init [_] = []
+init (x : xs) = x : init xs
 
-lastDigit :: [a] -> a
-lastDigit [] = error "Empty list"
-lastDigit [x] = x
-lastDigit (_ : xs) = lastDigit xs
+last :: [a] -> a
+last [] = error "Empty list"
+last [x] = x
+last (_ : xs) = last xs
 
 -----------------------------------
 --
@@ -86,12 +86,14 @@ reverse (x : xs) = reverse xs ++ [x]
 
 -----------------------------------
 --
--- Doubles every other digit starting from first one
+-- Doubles every other digit starting from first one at the end of the list
 --
 -- Usage example:
 --
 -- >>> doubleEveryOther [6,5,4,3]
--- [12,5,8,3]
+-- [6,10,4,6]
+-- >>> doubleEveryOther [1,2,3]
+-- [2, 2, 6]
 
 doubleEveryOther :: [Int] -> [Int]
 doubleEveryOther x = reverse (subDouble (reverse x))

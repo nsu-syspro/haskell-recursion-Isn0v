@@ -1,7 +1,9 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 {-# HLINT ignore "Use map" #-}
+{-# HLINT ignore "Use isDigit" #-}
 
 -- The above pragma enables all warnings
 -- (except for unused imports from Task1)
@@ -14,7 +16,7 @@ module Task2 where
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (allButLast, doubleEveryOther, lastDigit, map, reverse, sum, toDigits)
+import Task1 (init, doubleEveryOther, last, map, reverse, sum, toDigits)
 import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read, reverse, show, sum, tail)
 
 -----------------------------------
@@ -69,11 +71,11 @@ luhnHex = luhnModN 16 digitToInt
 
 digitToInt :: Char -> Int
 digitToInt c
-  | fromEnum c >= fromEnum '0' && fromEnum c <= fromEnum '9' =
+  | c >= '0' && c <= '9' =
       fromEnum c - fromEnum '0'
-  | fromEnum c >= fromEnum 'A' && fromEnum c <= fromEnum 'F' =
+  | c >= 'A' && c <= 'F' =
       fromEnum c - fromEnum 'A' + 10
-  | fromEnum c >= fromEnum 'a' && fromEnum c <= fromEnum 'f' =
+  | c >= 'a' && c <= 'f' =
       fromEnum c - fromEnum 'a' + 10
   | otherwise = error "Invalid digit"
 
@@ -92,7 +94,7 @@ digitToInt c
 -- False
 
 validateDec :: Integer -> Bool
-validateDec x = luhnDec (allButLast (toDigits x)) == lastDigit (toDigits x)
+validateDec x = luhnDec (init (toDigits x)) == last (toDigits x)
 
 -----------------------------------
 --
@@ -109,8 +111,9 @@ validateDec x = luhnDec (allButLast (toDigits x)) == lastDigit (toDigits x)
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex x = luhnHex (allButLast x) == digitToInt (lastDigit x)
+validateHex x = luhnHex (init x) == digitToInt (last x)
 
 normallize :: [Int] -> Int -> [Int]
-normallize x n = map (\y -> if y >= n then y - n + 1 else y) x
-
+normallize x n = map predicate x
+  where
+    predicate y = if y >= n then y - n + 1 else y
